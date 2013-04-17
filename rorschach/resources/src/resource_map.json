@@ -1,0 +1,113 @@
+
+{"friendlyVersion": "VERSION",
+ "versionDefName": "APP_RESOURCES",
+ "media": [
+	   {
+        "type": "png",
+        "defName": "IMAGE_MENU_ICON",
+        "file": "images/icon.png"
+	},
+
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_0",
+        "file": "images/0.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_1",
+        "file": "images/1.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_2",
+        "file": "images/2.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_3",
+        "file": "images/3.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_4",
+        "file": "images/4.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_5",
+        "file": "images/5.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_6",
+        "file": "images/6.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_7",
+        "file": "images/7.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_8",
+        "file": "images/8.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_9",
+        "file": "images/9.png"
+	},
+
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_0_REVERSE",
+        "file": "images/0_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_1_REVERSE",
+        "file": "images/1_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_2_REVERSE",
+        "file": "images/2_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_3_REVERSE",
+        "file": "images/3_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_4_REVERSE",
+        "file": "images/4_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_5_REVERSE",
+        "file": "images/5_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_6_REVERSE",
+        "file": "images/6_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_7_REVERSE",
+        "file": "images/7_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_8_REVERSE",
+        "file": "images/8_REVERSE.png"
+	},
+	{
+        "type": "png",
+        "defName": "IMAGE_NUM_9_REVERSE",
+        "file": "images/9_REVERSE.png"
+	}
+	  ]
+}
