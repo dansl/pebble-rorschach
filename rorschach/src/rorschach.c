@@ -1,16 +1,6 @@
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "pebble_fonts.h"
+#include <pebble.h>
 
-
-#define MY_UUID { 0xC9, 0x26, 0x15, 0x47, 0x71, 0x41, 0x44, 0xFF, 0x83, 0x7A, 0x86, 0xEC, 0xDF, 0xFD, 0x26, 0x63 }
-PBL_APP_INFO(MY_UUID,
-             "Rorschach", "Dansl",
-             1, 0, /* App version */
-             RESOURCE_ID_IMAGE_MENU_ICON,
-             APP_INFO_WATCH_FACE);
-
-Window window;
+Window *window;
 
 #define TOTAL_IMAGE_SLOTS 8
 
@@ -30,15 +20,10 @@ const int IMAGE_RESOURCE_REVERSE_IDS[NUMBER_OF_IMAGES] = {
   RESOURCE_ID_IMAGE_NUM_9_REVERSE
 };
 
-BmpContainer image_containers[TOTAL_IMAGE_SLOTS];
-
-#define EMPTY_SLOT -1
-
-int image_slot_state[TOTAL_IMAGE_SLOTS] = {EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT};
-
+BitmapLayer *image_containers[TOTAL_IMAGE_SLOTS];
+GBitmap     *bitmaps[TOTAL_IMAGE_SLOTS];
 
 void load_digit_image_into_slot(int slot_number, int digit_value, bool reversed) {
-
 
   if ((slot_number < 0) || (slot_number >= TOTAL_IMAGE_SLOTS)) {
     return;
@@ -48,31 +33,24 @@ void load_digit_image_into_slot(int slot_number, int digit_value, bool reversed)
     return;
   }
 
-  if (image_slot_state[slot_number] != EMPTY_SLOT) {
+  if(bitmaps[slot_number]){
     return;
   }
 
-  image_slot_state[slot_number] = digit_value;
   if(reversed){
-  	bmp_init_container(IMAGE_RESOURCE_REVERSE_IDS[digit_value], &image_containers[slot_number]);
+    bitmaps[slot_number] = gbitmap_create_with_resource(IMAGE_RESOURCE_REVERSE_IDS[digit_value]);
   }else{
-  	bmp_init_container(IMAGE_RESOURCE_IDS[digit_value], &image_containers[slot_number]);
+    bitmaps[slot_number] = gbitmap_create_with_resource(IMAGE_RESOURCE_IDS[digit_value]);
   }
-  image_containers[slot_number].layer.layer.frame.origin.x = ((slot_number % 4) * 36); 
-  image_containers[slot_number].layer.layer.frame.origin.y = ((slot_number / 4) * 70)+15;//+15 for top padding
-  layer_add_child(&window.layer, &image_containers[slot_number].layer.layer);
-
+  bitmap_layer_set_bitmap(image_containers[slot_number],bitmaps[slot_number]);
 }
 
 
 void unload_digit_image_from_slot(int slot_number) {
-
-  if (image_slot_state[slot_number] != EMPTY_SLOT) {
-    layer_remove_from_parent(&image_containers[slot_number].layer.layer);
-    bmp_deinit_container(&image_containers[slot_number]);
-    image_slot_state[slot_number] = EMPTY_SLOT;
+  if (bitmaps[slot_number]) {
+    gbitmap_destroy(bitmaps[slot_number]);
+    bitmaps[slot_number] = NULL;
   }
-
 }
 
 
@@ -116,61 +94,51 @@ unsigned short get_display_hour(unsigned short hour) {
 
 }
 
-
-void display_time(PblTm *tick_time) {
-
+void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   display_value(get_display_hour(tick_time->tm_hour), 0, true, true, 1, 0);
   display_value(get_display_hour(tick_time->tm_hour), 0, true, false, 3, 2);
   display_value(tick_time->tm_min, 1, true, false, 1, 0);
   display_value(tick_time->tm_min, 1, true, true, 3, 2);
+
+  layer_mark_dirty(window_get_root_layer(window));
 }
 
 
-void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) {
-  (void)t;
-  (void)ctx;
+void handle_init() {
 
-  display_time(t->tick_time);
-}
+  window = window_create();
+  
+  window_set_background_color(window, GColorWhite);
 
-
-void handle_init(AppContextRef ctx) {
-  (void)ctx;
-
-  window_init(&window, "Rorschach");
-  window_stack_push(&window, true);
-  window_set_background_color(&window, GColorWhite);
-
-  resource_init_current_app(&APP_RESOURCES);
-
-  // Avoids a blank screen on watch start.
-  PblTm tick_time;
-
-  get_time(&tick_time);
-  display_time(&tick_time);
-}
-
-
-void handle_deinit(AppContextRef ctx) {
-  (void)ctx;
+  Layer *window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_frame(window_layer);
 
   for (int i = 0; i < TOTAL_IMAGE_SLOTS; i++) {
-    unload_digit_image_from_slot(i);
+    bitmaps[i] = NULL;
+    image_containers[i] = bitmap_layer_create(GRect(
+      ((i % 4) * 36),
+      ((i / 4) * 70)+15,
+      36,70));
+    layer_add_child(window_layer, bitmap_layer_get_layer(image_containers[i]));
   }
 
+  tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
+
+  window_stack_push(window, true);
 }
 
 
-void pbl_main(void *params) {
-  PebbleAppHandlers handlers = {
-    .init_handler = &handle_init,
-    .deinit_handler = &handle_deinit,
+void handle_deinit() {
+  for (int i = 0; i < TOTAL_IMAGE_SLOTS; i++) {
+    unload_digit_image_from_slot(i);
+    bitmap_layer_destroy(image_containers[i]);
+  }
+  window_destroy(window);
+}
 
-    .tick_info = {
-      .tick_handler = &handle_minute_tick,
-      .tick_units = MINUTE_UNIT
-    }
 
-  };
-  app_event_loop(params, &handlers);
+int main(void) {
+  handle_init();
+  app_event_loop();
+  handle_deinit();
 }
